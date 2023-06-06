@@ -1,5 +1,3 @@
-
-
 const DB_NAME = "BatteryDB";
 const DB_VERSION = 1;
 const CHART_TITLE = "Battery Voltage Readings";
@@ -25,8 +23,6 @@ const VOLTAGE_STATE = [
 	{ stateOfCharge: 0, range: { high: 10.49, low: 0 } },
 ];
 
-
-
 /*
     TODO:
     - [x] Replace table with battery cards
@@ -36,7 +32,7 @@ const VOLTAGE_STATE = [
     - [ ] Display battery details in a modal when a card is clicked
     - [ ] Allow the user to edit the battery details
     - [ ] Allow the user to add a battery voltage reading from the battery details card
-    - [ ] Allow the user to remove a battery
+    - [x] Allow the user to remove a battery
     - [ ] Create a share button and functionality to share battery stats
 */
 
@@ -65,19 +61,46 @@ request.onupgradeneeded = function (event) {
 
 //Database functions
 request.onsuccess = function (event) {
-    // Define the database
+	
 	let db = event.target.result;
-    
-    // Initial display of the chart
-	createChart();
 
-    // Load the battery cards
-    loadBatteryCards();
+	updateUI();
 
-    // Load the battery table
-    // loadBatteryTable();
+	// Load seed data
+	// loadSeedData();
 
-	// Add a new battery to the database
+	function loadSeedData() {
+		// Batteries
+		addBattery({ brand: "Brand 1", deepCycle: true, ampHours: 110, cca: "", nickname: "Battery 1" });
+		addBattery({ brand: "Brand 2", deepCycle: true, ampHours: 110, cca: "", nickname: "Battery 2" });
+		addBattery({ brand: "Brand 3", deepCycle: false, ampHours: "", cca: "660", nickname: "Battery 3" });
+
+		//Readings
+		addVoltageReading({ batteryId: 1, timestamp: new Date(), voltage: 11.2 });
+		addVoltageReading({ batteryId: 2, timestamp: new Date(), voltage: 11.7 });
+		addVoltageReading({ batteryId: 2, timestamp: new Date(), voltage: 12.2 });
+		addVoltageReading({ batteryId: 3, timestamp: new Date(), voltage: 13.2 });
+	}
+
+	// BATTERIES
+
+	// Runs when a new battery is added via the modal form
+	document.getElementById("add-battery-form").addEventListener("submit", (event) => {
+		event.preventDefault();
+		const form = event.target;
+		let battery = {
+			brand: form["brand"].value,
+			deepCycle: form["deepCycle"].checked,
+			ampHours: form["ampHours"].value,
+			cca: form["cca"].value,
+			nickname: form["nickname"].value,
+			color: form["color"].value,
+		};
+		addBattery(battery);
+		form.reset();
+		updateUI();
+	});
+
 	function addBattery(battery) {
 		let transaction = db.transaction(["batteries"], "readwrite");
 		let store = transaction.objectStore("batteries");
@@ -85,33 +108,14 @@ request.onsuccess = function (event) {
 
 		request.onsuccess = function (event) {
 			console.log("Battery added successfully");
-			createChart();
+			updateUI();
 		};
 
 		request.onerror = function (event) {
 			console.error("Error adding battery", event.target.error);
 		};
-
 	}
 
-	// Add a new battery voltage reading to the database
-	function addVoltageReading(reading) {
-		let transaction = db.transaction(["readings"], "readwrite");
-		let store = transaction.objectStore("readings");
-		let request = store.add(reading);
-
-		request.onsuccess = function (event) {
-			console.log("Reading added successfully");
-			createChart();
-		};
-
-		request.onerror = function (event) {
-			console.error("Error adding reading", event.target.error);
-		};
-
-	}
-
-	// Get a list of all batteries
 	function getAllBatteries() {
 		return new Promise((resolve, reject) => {
 			let transaction = db.transaction(["batteries"], "readonly");
@@ -128,7 +132,39 @@ request.onsuccess = function (event) {
 		});
 	}
 
-    // Get a list of all voltage readings
+	function deleteBattery(batteryId) {
+		let transaction = db.transaction(["batteries"], "readwrite");
+		let store = transaction.objectStore("batteries");
+		let request = store.delete(batteryId);
+
+		request.onsuccess = function (event) {
+			deleteReadingsForBatteryId(batteryId);
+			console.log("Battery deleted successfully");
+			updateUI();
+		};
+
+		request.onerror = function (event) {
+			console.error("Error deleting battery", event.target.error);
+		};
+	}
+
+	// VOLTAGE READINGS
+
+	function addVoltageReading(reading) {
+		let transaction = db.transaction(["readings"], "readwrite");
+		let store = transaction.objectStore("readings");
+		let request = store.add(reading);
+
+		request.onsuccess = function (event) {
+			console.log("Reading added successfully");
+			updateUI();
+		};
+
+		request.onerror = function (event) {
+			console.error("Error adding reading", event.target.error);
+		};
+	}
+
 	function getAllVoltageReadings() {
 		return new Promise((resolve, reject) => {
 			let transaction = db.transaction(["readings"], "readonly");
@@ -145,7 +181,6 @@ request.onsuccess = function (event) {
 		});
 	}
 
-	// Query all readings for a specific battery
 	function getReadingsByBatteryId(batteryId) {
 		return new Promise((resolve, reject) => {
 			let transaction = db.transaction(["readings"], "readonly");
@@ -164,8 +199,46 @@ request.onsuccess = function (event) {
 		});
 	}
 
-    //Create and render the chart
-	async function createChart() {
+	function deleteReadingsForBatteryId(batteryId) {
+		console.error(batteryId);
+		let transaction = db.transaction(["readings"], "readwrite");
+		let store = transaction.objectStore("readings");
+		let index = store.index("batteryId");
+
+		const request = index.openCursor();
+
+		request.onsuccess = (event) => {
+			const cursor = event.target.result;
+
+			if (cursor) {
+				const voltageReading = cursor.value;
+
+				if (voltageReading.batteryId === batteryId) {
+					store.delete(cursor.primaryKey);
+				}
+
+				cursor.continue();
+			}
+		};
+
+		transaction.oncomplete = () => {
+			console.log("Deletion completed.");
+		};
+
+		transaction.onerror = (event) => {
+			console.error("Deletion error:", event.target.error);
+		};
+	}
+
+	// UI RENDERING
+
+	function updateUI() {
+		renderVoltageReadingChart();
+		renderBatteryCards();
+		// renderBatteryTable();
+	}
+
+	async function renderVoltageReadingChart() {
 		// Info: https://canvasjs.com/docs/charts/basics-of-creating-html5-chart/
 
 		// Get the batteries and readings from the database
@@ -196,7 +269,7 @@ request.onsuccess = function (event) {
 			data: batteries.map((battery) => {
 				return {
 					name: battery.nickname,
-                    color: battery.color,
+					color: battery.color,
 					type: DATA_POINT_TYPE,
 					xValueFormatString: DATA_POINT_X_VALUE_FORMAT,
 					yValueFormatString: DATA_POINT_Y_VALUE_FORMAT,
@@ -224,78 +297,75 @@ request.onsuccess = function (event) {
 			chart.render();
 		}
 	}
+	
+	async function renderBatteryCards() {
+		let batteries = await getAllBatteries();
+		let cardBox = document.getElementById("card-box");
+		cardBox.innerHTML = "";
+		
+		batteries.map((battery) => {
+			// Create a battery card
+			let card = document.createElement("div");
+			card.className = "card shadow text-center col-sm-6 col-md-4 col-lg-3 p-0";
+			card.style = `max-width: 18rem; border: 3px solid ${battery.color}`;
+			card.id = `batteryCard_${battery.id}`;
 
-    // Loads battery info into the battery table
-    async function loadBatteryTable() {
-        let batteries = await getAllBatteries();
-        let tableBody = document.getElementById("battery-table");
-        let tableContents = "";
-        batteries.map(battery => {
-            tableContents += `
-            <tr>
-                <td>${battery.id}</td>
-                <td>${battery.nickname}</td>
-                <td>${battery.brand}</td>
-                <td>${battery.deepCycle}</td>
-                <td>${battery.ampHours}</td>
-                <td>${battery.cca}</td>
-            </tr>`
-        });
-        
-        tableBody.innerHTML = tableContents;
-    }
+			// Give the card a header
+			let cardHeader = document.createElement("div");
+			cardHeader.className = "card-header";
+			cardHeader.innerHTML = battery.nickname;
 
-    function deleteBattery(batteryId) {
-        console.log(`Deleting battery with id "${batteryId}"`);
-    }
+			// Create a close button and add it to the card header
+			let deleteButton = document.createElement("button");
+			deleteButton.className = "btn-close float-end";
+			cardHeader.appendChild(deleteButton);
 
-    // Load battery cards
-    async function loadBatteryCards() {
-        let batteries = await getAllBatteries();
-        let cardBox = document.getElementById("card-box");
-        let cardBoxContents = "";
-        batteries.map(battery => {
-            cardBoxContents += `
-            <div class="card shadow text-center col-sm-6 col-md-4 col-lg-3 p-0" style="max-width: 18rem; border: 3px solid ${battery.color}">
-                <div class="card-header">${battery.nickname}</div>
-                <div class="card-body">
-                    <h5 class="card-title">${battery.brand}</h5>
-                    <p class="card-text">
-                        CCA: ${battery.cca}<br>
-                        Amp Hours: ${battery.ampHours}
-                    </p>
-                    <a href="/battery?id=${battery.id}" class="btn btn-outline-dark">Info</a>
-                </div>
-            </div>`;
+			// Assign the delete button a click event listener
+			deleteButton.addEventListener("click", () => {
+				deleteBattery(battery.id);
+			});
 
-            cardBox.innerHTML = cardBoxContents;
-        })
-    }
+			// Add the card body
+			let cardBody = document.createElement("div");
+			cardBody.className = "card-body";
+			cardBody.innerHTML = `
+				<h5 class="card-title">${battery.brand}</h5>
+				<p class="card-text">
+					CCA: ${battery.cca}<br>
+					Amp Hours: ${battery.ampHours}
+				</p>
+				<a href="/battery?id=${battery.id}" class="btn btn-outline-dark">Info</a>`;
 
-    // Runs when a new battery is added via the page form
-    document.getElementById("add-battery-form").addEventListener("submit", (event) => {
-        event.preventDefault();
+			// Add the header and body to the card
+			card.appendChild(cardHeader);
+			card.appendChild(cardBody);
 
-        const form = event.target;
-        let battery = {
-            brand: form["brand"].value,
-            deepCycle: form["deepCycle"].checked,
-            ampHours: form["ampHours"].value,
-            cca: form["cca"].value,
-            nickname: form["nickname"].value,
-            color: form["color"].value
-        };
-        addBattery(battery);
-        console.log(battery);
-        form.reset();
-        loadBatteryCards();
-    });
+			// Add the card to the card box
+			cardBox.appendChild(card);
+		});
+	}
 
+	async function renderBatteryTable() {
+		let batteries = await getAllBatteries();
+		let tableBody = document.getElementById("battery-table");
+		let tableContents = "";
+		batteries.map((battery) => {
+			tableContents += `
+			<tr>
+				<td>${battery.id}</td>
+				<td>${battery.nickname}</td>
+				<td>${battery.brand}</td>
+				<td>${battery.deepCycle}</td>
+				<td>${battery.ampHours}</td>
+				<td>${battery.cca}</td>
+			</tr>`;
+		});
+
+		tableBody.innerHTML = tableContents;
+	}
 };
 
-
-
-// Runs when the deepCycle checkbox is toggled, and displays the ampHour input if checked or the cca input if false 
+// Runs when the deepCycle checkbox is toggled, and displays the ampHour input if checked or the cca input if false
 document.getElementById("deepCycle").addEventListener("click", (event) => {
 	let ampHourDiv = document.getElementById("ampHoursDiv");
 	let ccaDiv = document.getElementById("ccaDiv");
@@ -309,13 +379,7 @@ document.getElementById("deepCycle").addEventListener("click", (event) => {
 	}
 });
 
-
 // When the modal is opened, focus on the nickname input field
-const batteryModal = document.getElementById("battery-modal");
-const nicknameInput = document.getElementById("nickname");
-batteryModal.addEventListener("shown.bs.modal", () => {
-    nicknameInput.focus();
+document.getElementById("battery-modal").addEventListener("shown.bs.modal", () => {
+	document.getElementById("nickname").focus();
 });
-
-
-                
