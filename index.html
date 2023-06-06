@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="color-scheme" content="light">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-9ndCyUaIbzAi2FUVXJi0CjmCapSmO7SnpJef0486qhLnuZ2cdeRhO02iuK6FUUVM" crossorigin="anonymous">
+
+    <link rel="stylesheet" href="./assets/css/styles.css">
+    <title>Battery Monitor</title>
+</head>
+
+<body>
+
+    <div class="container mt-5">
+
+        <div class="d-flex justify-content-between align-items-center mb-3">
+
+            <!-- Add battery modal trigger -->
+            <button id="add-button" type="button" class="btn btn-success" data-bs-toggle="modal"
+                data-bs-target="#battery-modal">Add
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-plus-circle-fill"
+                    viewBox="0 0 16 16">
+                    <path
+                        d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM8.5 4.5a.5.5 0 0 0-1 0v3h-3a.5.5 0 0 0 0 1h3v3a.5.5 0 0 0 1 0v-3h3a.5.5 0 0 0 0-1h-3v-3z" />
+                </svg>
+            </button>
+
+            <!-- Switch between light and dark modes -->
+            <div class="form-check form-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckChecked" checked>
+                <label class="form-check-label" for="flexSwitchCheckChecked">Light Mode</label>
+            </div>
+
+        </div>
+        
+
+        <div id="chartContainer" class="mx-auto mb-5" > <!-- Chart will be loaded here --> </div>
+        
+       
+        <div id="card-box" class="row gap-3 my-3 justify-content-center"> 
+            <!-- Battery cards will be rendered here --> 
+        </div>
+        
+        
+        <!-- Modal -->
+        <div class="modal fade" id="battery-modal" tabindex="-1" aria-labelledby="addBatteryModal" aria-hidden="true">
+            <form id="add-battery-form" class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="addBatteryModal">Add a new battery</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    
+                    <div class="modal-body">                        
+                        <div class="mb-3">
+                            <label for="nickname" class="form-label">Nickname</label>
+                            <input type="text" class="form-control" name="nickname" id="nickname" aria-describedby="nickname-help">
+                            <div id="nickname-help" class="form-text">A name to help you recognize this battery</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="brand" class="form-label">Brand</label>
+                            <input type="text" class="form-control" name="brand" id="brand" aria-describedby="brand-help">
+                            <div id="brand-help" class="form-text">E.g. Century N70ZZ</div>
+                        </div>
+                    
+                        <div class="row mb-3 gap-2">
+                            <div class="col align-self-center">
+                                <input type="checkbox" class="form-check-input" checked name="deepCycle" id="deepCycle">
+                                <label for="deepCycle" class="form-check-label">Deep Cycle?</label>
+                            </div>
+                            <div id="ampHoursDiv" class="col">
+                                <label for="ampHours" class="form-label">Amp Hours</label>
+                                <input type="number" min="0" max="2000" name="ampHours" id="ampHours" class="form-control">
+                            </div>
+                            <div id="ccaDiv" class="col" hidden>
+                                <label for="cca" class="form-label col">Cold Cranking Amps</label>
+                                <input type="number" min="0" max="2000" name="cca" id="cca" class="col form-control">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <label for="color" class="form-label">Color picker</label>
+                            <input type="color" class="form-control form-control-color" id="color" value="#563d7c"
+                                title="Choose your color">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="reset" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-success" data-bs-dismiss="modal">Add</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+    crossorigin="anonymous"></script>
+    
+    <script src="https://cdn.canvasjs.com/canvasjs.min.js"></script>
+    <script src="./assets/js/scripts.js"></script>
+</body>
+</html>
