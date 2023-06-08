@@ -10,23 +10,23 @@ const DATA_POINT_X_VALUE_FORMAT = "DDD MMM YYYY h:mm:ss tt";
 const DATA_POINT_Y_VALUE_FORMAT = "#0.#0 Volts";
 const DATA_POINT_TYPE = "spline";
 const VOLTAGE_STATE = [
-	{ stateOfCharge: 100, range: { high: 12.6, low: 12.5 } },
-	{ stateOfCharge: 90, range: { high: 12.49, low: 12.42 } },
-	{ stateOfCharge: 80, range: { high: 12.41, low: 12.32 } },
-	{ stateOfCharge: 70, range: { high: 12.31, low: 12.2 } },
-	{ stateOfCharge: 60, range: { high: 12.19, low: 12.06 } },
-	{ stateOfCharge: 50, range: { high: 12.05, low: 11.9 } },
-	{ stateOfCharge: 40, range: { high: 11.89, low: 11.75 } },
-	{ stateOfCharge: 30, range: { high: 11.74, low: 11.58 } },
-	{ stateOfCharge: 20, range: { high: 11.57, low: 11.31 } },
-	{ stateOfCharge: 10, range: { high: 11.3, low: 10.5 } },
-	{ stateOfCharge: 0, range: { high: 10.49, low: 0 } },
+	{ stateOfCharge: 100, range: { high: Infinity, low: 12.5 }, colorClass: "full" },
+	{ stateOfCharge: 90, range: { high: 12.49, low: 12.42 }, colorClass: "full" },
+	{ stateOfCharge: 80, range: { high: 12.41, low: 12.32 }, colorClass: "ok" },
+	{ stateOfCharge: 70, range: { high: 12.31, low: 12.2 }, colorClass: "ok" },
+	{ stateOfCharge: 60, range: { high: 12.19, low: 12.06 }, colorClass: "ok" },
+	{ stateOfCharge: 50, range: { high: 12.05, low: 11.9 }, colorClass: "ok" },
+	{ stateOfCharge: 40, range: { high: 11.89, low: 11.75 }, colorClass: "low" },
+	{ stateOfCharge: 30, range: { high: 11.74, low: 11.58 }, colorClass: "low" },
+	{ stateOfCharge: 20, range: { high: 11.57, low: 11.31 }, colorClass: "discharged" },
+	{ stateOfCharge: 10, range: { high: 11.3, low: 10.5 }, colorClass: "discharged" },
+	{ stateOfCharge: 0, range: { high: 10.49, low: 0 }, colorClass: "discharged" },
 ];
 
 /*
     TODO:
     - [x] Replace table with battery cards
-    - [ ] Show the battery state using the given values above (VOLTAGE_STATE)
+    - [x] Show the battery state using the given values above (VOLTAGE_STATE)
     - [x] Add an 'Add Battery' icon button
     - [x] Put the 'add battery' form in a modal
     - [ ] Display battery details in a modal when a card is clicked
@@ -71,15 +71,16 @@ request.onsuccess = function (event) {
 
 	function loadSeedData() {
 		// Batteries
-		addBattery({ brand: "Brand 1", deepCycle: true, ampHours: 110, cca: "", nickname: "Battery 1" });
-		addBattery({ brand: "Brand 2", deepCycle: true, ampHours: 110, cca: "", nickname: "Battery 2" });
-		addBattery({ brand: "Brand 3", deepCycle: false, ampHours: "", cca: "660", nickname: "Battery 3" });
+		addBattery({ brand: "Brand 1", deepCycle: true, ampHours: 110, cca: "", nickname: "Battery 1", color: "green" });
+		addBattery({ brand: "Brand 2", deepCycle: true, ampHours: 110, cca: "", nickname: "Battery 2", color: "red" });
+		addBattery({ brand: "Brand 3", deepCycle: false, ampHours: "", cca: "660", nickname: "Battery 3", color:"blue" });
 
 		//Readings
-		addVoltageReading({ batteryId: 1, timestamp: new Date(), voltage: 11.2 });
-		addVoltageReading({ batteryId: 2, timestamp: new Date(), voltage: 11.7 });
-		addVoltageReading({ batteryId: 2, timestamp: new Date(), voltage: 12.2 });
-		addVoltageReading({ batteryId: 3, timestamp: new Date(), voltage: 13.2 });
+		addVoltageReading({ batteryId: 1, timestamp: new Date(2023, 0, 1), voltage: 11.2 });
+		addVoltageReading({ batteryId: 2, timestamp: new Date(2023, 2, 25), voltage: 12.1 });
+		addVoltageReading({ batteryId: 2, timestamp: new Date(2023, 1, 25), voltage: 12.2 });
+		addVoltageReading({ batteryId: 2, timestamp: new Date(2023, 0, 25), voltage: 11.7 });
+		addVoltageReading({ batteryId: 3, timestamp: new Date(2023, 4, 25), voltage: 13.2 });
 	}
 
 	// BATTERIES
@@ -300,10 +301,14 @@ request.onsuccess = function (event) {
 	
 	async function renderBatteryCards() {
 		let batteries = await getAllBatteries();
+		let allReadings = await getAllVoltageReadings();
 		let cardBox = document.getElementById("card-box");
 		cardBox.innerHTML = "";
 		
 		batteries.map((battery) => {
+			// Get the readings for just this battery
+			const readings = allReadings.filter((reading) => reading.batteryId === battery.id);
+
 			// Create a battery card
 			let card = document.createElement("div");
 			card.className = "card shadow text-center col-sm-6 col-md-4 col-lg-3 p-0";
@@ -313,17 +318,31 @@ request.onsuccess = function (event) {
 			// Give the card a header
 			let cardHeader = document.createElement("div");
 			cardHeader.className = "card-header";
-			cardHeader.innerHTML = battery.nickname;
+			cardHeader.innerHTML = `<h4>${battery.nickname}</h4>`;
 
 			// Create a close button and add it to the card header
 			let deleteButton = document.createElement("button");
-			deleteButton.className = "btn-close float-end";
+			deleteButton.className = "btn-close";
 			cardHeader.appendChild(deleteButton);
 
 			// Assign the delete button a click event listener
 			deleteButton.addEventListener("click", () => {
 				deleteBattery(battery.id);
 			});
+
+			// Add the most recent reading value and charge percentage if there are readings
+			if (readings) {
+				readings.sort((a, b) => b.timestamp - a.timestamp);
+				const mostRecentReading = readings[0];
+
+				let span = document.createElement("span");
+				span.innerHTML = `<div class="row"><small>(${
+					mostRecentReading.voltage
+				}v - ${getState(mostRecentReading.voltage).stateOfCharge}%)</small></div>`;
+				cardHeader.appendChild(span);
+
+				cardHeader.classList.add(getState(mostRecentReading.voltage).colorClass);
+			}
 
 			// Add the card body
 			let cardBody = document.createElement("div");
@@ -334,7 +353,7 @@ request.onsuccess = function (event) {
 					CCA: ${battery.cca}<br>
 					Amp Hours: ${battery.ampHours}
 				</p>
-				<a href="/battery?id=${battery.id}" class="btn btn-outline-dark">Info</a>`;
+				<a href="/battery?id=${battery.id}" class="btn btn-outline-dark">More Info</a>`;
 
 			// Add the header and body to the card
 			card.appendChild(cardHeader);
@@ -383,3 +402,8 @@ document.getElementById("deepCycle").addEventListener("click", (event) => {
 document.getElementById("battery-modal").addEventListener("shown.bs.modal", () => {
 	document.getElementById("nickname").focus();
 });
+
+// Returns the battery state based on a given voltage reading
+function getState(voltage) {
+	return VOLTAGE_STATE.filter((state) => voltage <= state.range.high && voltage >= state.range.low)[0];
+}

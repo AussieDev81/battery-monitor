@@ -12,6 +12,13 @@
     --dark-color: #171435;
     --mid-color: #8F8AC0;
     --light-color: #FFFFFF;
+
+    --card-border-width: 3px;
+    --full: rgba(28, 171, 28, 0.853);
+    --ok: rgba(88, 228, 18, 0.742);
+    --low: rgba(255, 166, 0, 0.829);
+    --discharged: rgba(255, 0, 0, 0.762);
+
 }
 
 body {
@@ -22,9 +29,14 @@ body {
 
 .container {
     background: var(--light-color);
-    border: 1px solid #171435;
+    /* border: 1px solid #171435; */
     /* height: 600px;
     width: 1200px; */
+}
+
+.btn-close {
+    position: absolute;
+    left: 250px;
 }
 
 #output {
@@ -47,3 +59,21 @@ body {
 #add-button {
     float: right;
 }
+
+.full {
+    /* background-color: green; */
+    background-color: var(--full);
+}
+
+.ok {
+    background-color: var(--ok);
+}
+
+.low {
+    background-color: var(--low);
+}
+
+.discharged {
+    background-color: var(--discharged);
+}
+
