@@ -35,8 +35,7 @@ body {
 }
 
 .btn-close {
-    position: absolute;
-    left: 250px;
+    float: right;
 }
 
 #output {

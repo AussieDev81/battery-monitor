@@ -21,7 +21,7 @@
 
             <!-- Add battery modal trigger -->
             <button id="add-button" type="button" class="btn btn-success" data-bs-toggle="modal"
-                data-bs-target="#battery-modal">Add
+                data-bs-target="#add-battery-modal">Add
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-plus-circle-fill"
                     viewBox="0 0 16 16">
                     <path
@@ -46,8 +46,8 @@
         </div>
         
         
-        <!-- Modal -->
-        <div class="modal fade" id="battery-modal" tabindex="-1" aria-labelledby="addBatteryModal" aria-hidden="true">
+        <!-- Add Battery Modal -->
+        <div class="modal fade" id="add-battery-modal" tabindex="-1" aria-labelledby="addBatteryModal" aria-hidden="true">
             <form id="add-battery-form" class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -90,6 +90,57 @@
                     <div class="modal-footer">
                         <button type="reset" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-success" data-bs-dismiss="modal">Add</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Edit Battery Modal -->
+        <div class="modal fade" id="edit-battery-modal" tabindex="-1" aria-labelledby="editBatteryModal" aria-hidden="true">
+            <form id="edit-battery-form" class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="editBatteryModal">Edit</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+        
+                    <div class="modal-body">
+                        <input type="hidden" name="edit-id">
+                        <div class="mb-3">
+                            <label for="edit-nickname" class="form-label">Nickname</label>
+                            <input type="text" class="form-control" name="edit-nickname" id="edit-nickname"
+                                aria-describedby="nickname-help">
+                            <div id="nickname-help" class="form-text">A name to help you recognize this battery</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-brand" class="form-label">Brand</label>
+                            <input type="text" class="form-control" name="edit-brand" id="edit-brand" aria-describedby="edit-brand-help">
+                            <div id="edit-brand-help" class="form-text">E.g. Century N70ZZ</div>
+                        </div>
+        
+                        <div class="row mb-3 gap-2">
+                            <div class="col align-self-center">
+                                <input type="checkbox" class="form-check-input" checked name="edit-deepCycle" id="edit-deepCycle">
+                                <label for="edit-deepCycle" class="form-check-label">Deep Cycle?</label>
+                            </div>
+                            <div id="edit-ampHoursDiv" class="col">
+                                <label for="edit-ampHours" class="form-label">Amp Hours</label>
+                                <input type="number" min="0" max="2000" name="edit-ampHours" id="edit-ampHours" class="form-control">
+                            </div>
+                            <div id="edit-ccaDiv" class="col" hidden>
+                                <label for="edit-cca" class="form-label col">Cold Cranking Amps</label>
+                                <input type="number" min="0" max="2000" name="edit-cca" id="edit-cca" class="col form-control">
+                            </div>
+                        </div>
+                        <div class="col">
+                            <label for="edit-color" class="form-label">Color picker</label>
+                            <input type="color" class="form-control form-control-color" id="edit-color" value="#000000"
+                                title="Choose your color">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="reset" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success" data-bs-dismiss="modal">Update</button>
                     </div>
                 </div>
             </form>
