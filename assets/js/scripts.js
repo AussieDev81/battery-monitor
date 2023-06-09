@@ -239,13 +239,25 @@ request.onsuccess = function (event) {
 
 	// VOLTAGE READINGS
 
+	document.getElementById("add-reading-button").addEventListener("click", (event) => {
+		const batteryId = Number(document.getElementById("edit-id").value);
+		const form = document.getElementById("add-reading-form");
+		form.addEventListener("submit", (e) => {
+			e.preventDefault();
+			const voltage = parseFloat(form["volts"].value);
+			if (parseFloat(voltage)) {
+				addVoltageReading({ batteryId: batteryId, timestamp: new Date(), voltage: voltage });
+			}
+		});
+	});
+
 	function addVoltageReading(reading) {
 		let transaction = db.transaction(["readings"], "readwrite");
 		let store = transaction.objectStore("readings");
 		let request = store.add(reading);
 
 		request.onsuccess = function (event) {
-			console.log("Reading added successfully");
+			console.log("Reading added successfully", reading);
 			updateUI();
 		};
 
@@ -365,6 +377,7 @@ request.onsuccess = function (event) {
 					showInLegend: true,
 					dataPoints: voltageReadings
 						.filter((reading) => reading.batteryId == battery.id)
+						.sort((a, b) => a.timestamp - b.timestamp)
 						.map((reading) => {
 							return {
 								x: reading.timestamp,

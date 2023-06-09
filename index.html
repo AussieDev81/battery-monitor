@@ -105,7 +105,7 @@
                     </div>
         
                     <div class="modal-body">
-                        <input type="hidden" name="edit-id">
+                        <input type="hidden" name="edit-id" id="edit-id">
                         <div class="mb-3">
                             <label for="edit-nickname" class="form-label">Nickname</label>
                             <input type="text" class="form-control" name="edit-nickname" id="edit-nickname"
@@ -139,12 +139,49 @@
                         </div>
                     </div>
                     <div class="modal-footer">
+                        <!-- Add battery reading modal trigger -->
+                        <button id="add-reading-button" type="button" class="btn btn-primary" 
+                        data-bs-toggle="modal"
+                            data-bs-target="#add-reading-modal">Add Reading
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-bolt" width="24" height="24"
+                                viewBox="0 0 24 24" stroke-width="1.5" stroke="#ffffff" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+                                <path d="M13 3l0 7l6 0l-8 11l0 -7l-6 0l8 -11" />
+                            </svg>
+                        </button>
+                        
                         <button type="reset" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                         <button type="submit" class="btn btn-success" data-bs-dismiss="modal">Update</button>
                     </div>
                 </div>
             </form>
         </div>
+
+        <!-- Add Reading Modal -->
+        <div class="modal fade" id="add-reading-modal" tabindex="-1" aria-labelledby="addReadingModal" aria-hidden="true">
+            <form id="add-reading-form" class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h1 class="modal-title fs-5" id="addReadingModal">Add a new voltage Reading</h1>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+        
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="volts" class="form-label">Volts</label>
+                            <input type="text" class="form-control" name="volts" id="volts"
+                                aria-describedby="volts-help">
+                            <div id="volts-help" class="form-text">Enter the voltage reading upto 2 decimal places</div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="reset" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success" data-bs-dismiss="modal">Add</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
     </div>
 
     
