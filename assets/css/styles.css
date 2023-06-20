@@ -1,66 +1,120 @@
-/* Ubuntu font */
-@import url('https://fonts.googleapis.com/css2?family=Ubuntu:wght@300;400;500;700&display=swap');
-
-/* Font awesome 6 */
-/* @import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css'); */
-
-/* Material Symbols */
-@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Sriracha&display=swap');
 
 :root {
+    /* Theme colors */
     --brand-color: #F62F63;
-    --dark-color: #171435;
-    --mid-color: #8F8AC0;
+    --dark-color: #212529;
+    --mid-color: #2A2A2A;
     --light-color: #FFFFFF;
 
     --card-border-width: 3px;
+
+    /* Battery state colors */
     --full: rgba(28, 171, 28, 0.853);
     --ok: rgba(88, 228, 18, 0.742);
     --low: rgba(255, 166, 0, 0.829);
     --discharged: rgba(255, 0, 0, 0.762);
-
 }
 
 body {
-    font-family: 'Ubuntu';
+    font-family: 'Poppins';
     box-sizing: border-box;
     margin: 0;
 }
 
-.container {
-    background: var(--light-color);
-    /* border: 1px solid #171435; */
-    /* height: 600px;
-    width: 1200px; */
+hgroup {
+    text-align: center;
+    margin-bottom: 2rem;
 }
 
-.btn-close {
+tr {
+    vertical-align: middle;
+}
+
+footer {
+    text-align: center;
+    margin-block: 1rem;
+}
+
+hr {
+    border-top: solid 2px #504f4fdb;
+    margin-top: 3rem;
+}
+
+#subtitle {
+    font-family: 'Sriracha', cursive;
+    font-size: x-large;
+    color: var(--brand-color);
+}
+
+.heading {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+/* Background color utilities */
+.background-dark {
+    background-color: var(--dark-color);
+}
+
+.background-mid {
+    background-color: var(--mid-color);
+}
+
+.background-light {
+    background-color: var(--light-color);
+}
+
+
+/* Font color utilities */
+.font-dark {
+    color: var(--dark-color);
+}
+
+.font-light {
+    color: var(--light-color);
+}
+
+
+/* Light & Dark Theme switching */
+#theme-selector {
+    list-style: none;
+}
+
+.theme-icon,
+.theme-icon-active {
+    max-width: 1rem;
+    max-height: 1rem;
+}
+
+
+/* Add Battery Modal */
+#add-button {
     float: right;
 }
 
-#output {
-    display: flex;
+.btn-close {
+    position: absolute;
+    right: 10px;
+    top: 10px;
 }
 
-.deep-cycle {
-    background-color: green;
+.button-container {
+    display: inline-flex;
+    gap: 1rem;
 }
 
-.cranking {
-    background-color: pink;
-}
 
+/* Readings Chart */
 #chartContainer {
     height: 300px;
     width: 80%;
 }
 
-#add-button {
-    float: right;
-}
 
+/* Battery Cards */
 .full {
-    /* background-color: green; */
     background-color: var(--full);
 }
 
@@ -74,5 +128,39 @@ body {
 
 .discharged {
     background-color: var(--discharged);
+}
+
+.battery-indicator {
+    width: 1em;
+    height: 1em;
+    vertical-align: -0.125em;
+    fill: currentcolor;
+}
+
+
+/* Readings Table */
+/* #voltage-reading-table-container {
+    padding-block-end: 3rem;
+} */
+
+td.background-dark {
+    background-color: var(--dark-color);
+}
+
+td.background-mid {
+    background-color: var(--mid-color);
+}
+
+.gridjs-input,
+.gridjs-search-input,
+.gridjs-currentPage,
+.gridjs-pages button {
+    color: var(--dark-color);
+}
+
+/* Instructions */
+.fit-center {
+    max-width: max-content;
+    margin: auto;
 }
 

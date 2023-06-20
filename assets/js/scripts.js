@@ -10,7 +10,12 @@ const DATA_POINT_X_VALUE_FORMAT = "DDD MMM YYYY h:mm:ss tt";
 const DATA_POINT_Y_VALUE_FORMAT = "#0.#0 Volts";
 const DATA_POINT_TYPE = "spline";
 const VOLTAGE_STATE = [
-	{ stateOfCharge: 100, range: { high: Infinity, low: 12.5 }, colorClass: "full", icon: "../assets/images/battery-4.svg" },
+	{
+		stateOfCharge: 100,
+		range: { high: Infinity, low: 12.5 },
+		colorClass: "full",
+		icon: "../assets/images/battery-4.svg",
+	},
 	{ stateOfCharge: 90, range: { high: 12.49, low: 12.42 }, colorClass: "full", icon: "../assets/images/battery-4.svg" },
 	{ stateOfCharge: 80, range: { high: 12.41, low: 12.32 }, colorClass: "ok", icon: "../assets/images/battery-3.svg" },
 	{ stateOfCharge: 70, range: { high: 12.31, low: 12.2 }, colorClass: "ok", icon: "../assets/images/battery-3.svg" },
@@ -18,9 +23,24 @@ const VOLTAGE_STATE = [
 	{ stateOfCharge: 50, range: { high: 12.05, low: 11.9 }, colorClass: "ok", icon: "../assets/images/battery-3.svg" },
 	{ stateOfCharge: 40, range: { high: 11.89, low: 11.75 }, colorClass: "low", icon: "../assets/images/battery-2.svg" },
 	{ stateOfCharge: 30, range: { high: 11.74, low: 11.58 }, colorClass: "low", icon: "../assets/images/battery-2.svg" },
-	{ stateOfCharge: 20, range: { high: 11.57, low: 11.31 }, colorClass: "discharged", icon: "../assets/images/battery-1.svg" },
-	{ stateOfCharge: 10, range: { high: 11.3, low: 10.5 }, colorClass: "discharged", icon: "../assets/images/battery-1.svg" },
-	{ stateOfCharge: 0, range: { high: 10.49, low: 0 }, colorClass: "discharged", icon: "../assets/images/battery-1.svg" },
+	{
+		stateOfCharge: 20,
+		range: { high: 11.57, low: 11.31 },
+		colorClass: "discharged",
+		icon: "../assets/images/battery-1.svg",
+	},
+	{
+		stateOfCharge: 10,
+		range: { high: 11.3, low: 10.5 },
+		colorClass: "discharged",
+		icon: "../assets/images/battery-1.svg",
+	},
+	{
+		stateOfCharge: 0,
+		range: { high: 10.49, low: 0 },
+		colorClass: "discharged",
+		icon: "../assets/images/battery-1.svg",
+	},
 ];
 const BATTERY_ICON = [
 	{ full: "../assets/images/battery-4.svg" },
@@ -28,19 +48,6 @@ const BATTERY_ICON = [
 	{ low: "../assets/images/battery-2.svg" },
 	{ discharged: "../assets/images/battery-1.svg" },
 ];
-
-/*
-    TODO:
-    - [x] Replace table with battery cards
-    - [x] Show the battery state using the given values above (VOLTAGE_STATE)
-    - [x] Add an 'Add Battery' icon button
-    - [x] Put the 'add battery' form in a modal
-    - [x] Display battery details in a modal when a card is clicked
-    - [x] Allow the user to edit the battery details
-    - [ ] Allow the user to add a battery voltage reading from the battery details card
-    - [x] Allow the user to remove a battery
-    - [ ] Create a share button and functionality to share battery stats
-*/
 
 let chart;
 
@@ -62,53 +69,16 @@ request.onupgradeneeded = function (event) {
 	batteryStore.createIndex("color", "color", { unique: false });
 
 	readingStore.createIndex("batteryId", "batteryId", { unique: false });
+	readingStore.createIndex("id", "id", { unique: false });
 	readingStore.createIndex("timestamp", "timestamp", { unique: false });
 };
 
 //Database functions
 request.onsuccess = function (event) {
-	
 	let db = event.target.result;
-
 	updateUI();
 
-	// Load seed data
-	// loadSeedData();
-
-	function loadSeedData() {
-		// Batteries
-		addBattery({ brand: "Brand 1", deepCycle: true, ampHours: 110, cca: "", nickname: "Battery 1", color: "#3cc627" });
-		addBattery({ brand: "Brand 2", deepCycle: true, ampHours: 110, cca: "", nickname: "Battery 2", color: "#c62a27" });
-		addBattery({ brand: "Brand 3", deepCycle: false, ampHours: "", cca: "660", nickname: "Battery 3", color:"#2732c6" });
-
-		//Readings
-		addVoltageReading({ batteryId: 1, timestamp: new Date(2023, 0, 1), voltage: 11.2 });
-		addVoltageReading({ batteryId: 2, timestamp: new Date(2023, 2, 25), voltage: 12.1 });
-		addVoltageReading({ batteryId: 2, timestamp: new Date(2023, 1, 25), voltage: 12.2 });
-		addVoltageReading({ batteryId: 2, timestamp: new Date(2023, 0, 25), voltage: 11.7 });
-		addVoltageReading({ batteryId: 3, timestamp: new Date(2023, 4, 25), voltage: 13.2 });
-	}
-
-	// BATTERIES
-
-	// Runs when a new battery is added via the modal form
-	document.getElementById("add-battery-form").addEventListener("submit", (event) => {
-		event.preventDefault();
-		const form = event.target;
-		const isDeepCycle = form["deepCycle"].checked;
-
-		let battery = {
-			brand: form["brand"].value,
-			deepCycle: isDeepCycle,
-			ampHours: isDeepCycle? form["ampHours"].value : 0,
-			cca: isDeepCycle? 0 : form["cca"].value,
-			nickname: form["nickname"].value,
-			color: form["color"].value,
-		};
-		addBattery(battery);
-		form.reset();
-		updateUI();
-	});
+	//================ BATTERIES ================ //
 
 	function addBattery(battery) {
 		let transaction = db.transaction(["batteries"], "readwrite");
@@ -124,27 +94,6 @@ request.onsuccess = function (event) {
 			console.error("Error adding battery", event.target.error);
 		};
 	}
-
-	// Runs when a battery card is clicked
-	document.getElementById("edit-battery-form").addEventListener("submit", (event) => {
-		event.preventDefault();
-		const form = event.target;
-		let isDeepCycle = form["edit-deepCycle"].checked;
-
-		let battery = {
-			id: Number(form["edit-id"].value),
-			brand: form["edit-brand"].value,
-			deepCycle: isDeepCycle,
-			ampHours: isDeepCycle? parseFloat(form["edit-ampHours"].value) : 0,
-			cca: isDeepCycle? 0 : parseFloat(form["edit-cca"].value),
-			nickname: form["edit-nickname"].value,
-			color: form["edit-color"].value,
-		};
-
-		updateBattery(battery);
-		form.reset();
-		updateUI();
-	});
 
 	function updateBattery(battery) {
 		let transaction = db.transaction(["batteries"], "readwrite");
@@ -186,7 +135,6 @@ request.onsuccess = function (event) {
 
 		// Set a custom modal title for the battery
 		modal.innerText = `Edit ${battery.nickname}`;
-
 	}
 
 	function getAllBatteries() {
@@ -237,19 +185,45 @@ request.onsuccess = function (event) {
 		};
 	}
 
-	// VOLTAGE READINGS
+	document.getElementById("add-battery-form").addEventListener("submit", (event) => {
+		event.preventDefault();
+		const form = event.target;
+		const isDeepCycle = form["deepCycle"].checked;
 
-	document.getElementById("add-reading-button").addEventListener("click", (event) => {
-		const batteryId = Number(document.getElementById("edit-id").value);
-		const form = document.getElementById("add-reading-form");
-		form.addEventListener("submit", (e) => {
-			e.preventDefault();
-			const voltage = parseFloat(form["volts"].value);
-			if (parseFloat(voltage)) {
-				addVoltageReading({ batteryId: batteryId, timestamp: new Date(), voltage: voltage });
-			}
-		});
+		let battery = {
+			brand: form["brand"].value,
+			deepCycle: isDeepCycle,
+			ampHours: Number(isDeepCycle ? form["ampHours"].value : 0),
+			cca: Number(isDeepCycle ? 0 : form["cca"].value),
+			nickname: form["nickname"].value,
+			color: form["color"].value,
+		};
+		addBattery(battery);
+		form.reset();
+		updateUI();
 	});
+
+	document.getElementById("edit-battery-form").addEventListener("submit", (event) => {
+		event.preventDefault();
+		const form = event.target;
+		let isDeepCycle = form["edit-deepCycle"].checked;
+
+		let battery = {
+			id: Number(form["edit-id"].value),
+			brand: form["edit-brand"].value,
+			deepCycle: isDeepCycle,
+			ampHours: Number(isDeepCycle ? form["edit-ampHours"].value : 0),
+			cca: Number(isDeepCycle ? 0 : form["edit-cca"].value),
+			nickname: form["edit-nickname"].value,
+			color: form["edit-color"].value,
+		};
+
+		updateBattery(battery);
+		form.reset();
+		updateUI();
+	});
+
+	//================ VOLTAGE READINGS ================ //
 
 	function addVoltageReading(reading) {
 		let transaction = db.transaction(["readings"], "readwrite");
@@ -263,6 +237,21 @@ request.onsuccess = function (event) {
 
 		request.onerror = function (event) {
 			console.error("Error adding reading", event.target.error);
+		};
+	}
+
+	function updateVoltageReading(voltageReading) {
+		let transaction = db.transaction(["readings"], "readwrite");
+		let store = transaction.objectStore("readings");
+		let request = store.put(voltageReading);
+
+		request.onsuccess = function () {
+			console.log("Voltage reading updated successfully");
+			updateUI();
+		};
+
+		request.onerror = function (event) {
+			console.error("Error updating voltage reading", event.target.error);
 		};
 	}
 
@@ -301,7 +290,6 @@ request.onsuccess = function (event) {
 	}
 
 	function deleteReadingsForBatteryId(batteryId) {
-		console.error(batteryId);
 		let transaction = db.transaction(["readings"], "readwrite");
 		let store = transaction.objectStore("readings");
 		let index = store.index("batteryId");
@@ -331,15 +319,77 @@ request.onsuccess = function (event) {
 		};
 	}
 
-	// UI RENDERING
+	function deleteReadingById(readingId) {
+		let transaction = db.transaction(["readings"], "readwrite");
+		let store = transaction.objectStore("readings");
+		let request = store.delete(readingId);
 
-	function updateUI() {
-		renderVoltageReadingChart();
-		renderBatteryCards();
-		// renderBatteryTable();
+		request.onsuccess = function (event) {
+			console.log("Reading deleted successfully");
+			updateUI();
+		};
+
+		request.onerror = function (event) {
+			console.error("Error deleting reading", event.target.error);
+		};
 	}
 
+	document.getElementById("add-reading-form").addEventListener("submit", async (e) => {
+		e.preventDefault();
+		let batteryIdValue = document.getElementById("edit-id").value;
+		const batteryId =
+			batteryIdValue === ""
+				? await getAllBatteries().then((batteries) => {
+						return batteries[0].id;
+				  })
+				: Number(batteryIdValue);
+
+		const voltage = parseFloat(e.target["volts"].value).toFixed(2);
+
+		if (!isNaN(voltage)) {
+			addVoltageReading({ batteryId: batteryId, timestamp: new Date(), voltage: voltage });
+		}
+	});
+
+	//================ UI RENDERING ================ //
+
+	function updateUI() {
+		getStarted();
+		renderVoltageReadingChart();
+		renderBatteryCards();
+		renderBatteryReadingsTable();
+	}
+
+	/**
+	 * Displays an alert prompting the user to add a battery if there are no batteries, and
+	 * displays an alert prompting the user to add a reading if there is one or more batteries
+	 * on record but zero (in total) voltage readings
+	 */
+	async function getStarted() {
+		const batteries = await getAllBatteries();
+		const readings = await getAllVoltageReadings();
+		const addBatteryAlert = document.getElementById("add-battery-alert");
+		const addReadingAlert = document.getElementById("add-reading-alert");
+		addBatteryAlert.style.display = "none";
+		addReadingAlert.style.display = "none";
+
+		if (batteries.length === 0) {
+			//Prompt the user to add a battery
+			addBatteryAlert.style.display = "block";
+			addBatteryAlert.classList.add("show");
+		}
+		if (batteries.length > 0 && readings.length === 0) {
+			//Prompt the user to add a reading
+			addReadingAlert.style.display = "block";
+			addReadingAlert.classList.add("show");
+		}
+	}
+
+	/**
+	 * Constructs and renders the battery voltage reading chart on the page
+	 */
 	async function renderVoltageReadingChart() {
+		const theme = document.documentElement.getAttribute("data-bs-theme");
 		// Info: https://canvasjs.com/docs/charts/basics-of-creating-html5-chart/
 
 		// Get the batteries and readings from the database
@@ -349,6 +399,7 @@ request.onsuccess = function (event) {
 		// Define and create the chart
 		chart = new CanvasJS.Chart("chartContainer", {
 			animationEnabled: true,
+			theme: theme === "dark" ? "dark1" : "light1",
 			title: {
 				text: CHART_TITLE,
 			},
@@ -381,7 +432,7 @@ request.onsuccess = function (event) {
 						.map((reading) => {
 							return {
 								x: reading.timestamp,
-								y: reading.voltage,
+								y: parseFloat(reading.voltage),
 							};
 						}),
 				};
@@ -399,13 +450,17 @@ request.onsuccess = function (event) {
 			chart.render();
 		}
 	}
-	
+
+	/**
+	 * Constructs and builds bootstrap cards for each battery, showing it's name, most recent voltage state, and rated
+	 * amp hours or CCA rating
+	 */
 	async function renderBatteryCards() {
 		let batteries = await getAllBatteries();
 		let allReadings = await getAllVoltageReadings();
 		let cardBox = document.getElementById("card-box");
 		cardBox.innerHTML = "";
-		
+
 		batteries.map((battery) => {
 			// Get the readings for just this battery
 			const readings = allReadings.filter((reading) => reading.batteryId === battery.id);
@@ -416,39 +471,61 @@ request.onsuccess = function (event) {
 			card.style = `max-width: 18rem; border: 3px solid ${battery.color}`;
 			card.id = `batteryCard_${battery.id}`;
 
-			// Give the card a header
-			let cardHeader = document.createElement("div");
-			cardHeader.className = "card-header";
-
 			// Create a close button and add it to the card header
 			let deleteButton = document.createElement("button");
+			deleteButton.title = "Delete";
 			deleteButton.className = "btn-close";
-			cardHeader.appendChild(deleteButton);
-			cardHeader.innerHTML += `<h4>${battery.nickname}</h4>`;
 
 			// Assign the delete button a click event listener
 			deleteButton.addEventListener("click", () => {
-				deleteBattery(battery.id);
+				const deleteConfirmed = confirm(
+					`Are you sure you want to delete ${battery.nickname}?\nThis action can't be undone`
+				);
+				if (deleteConfirmed) {
+					deleteBattery(battery.id);
+				}
 			});
 
+			card.appendChild(deleteButton);
+
+			// Give the card a header
+			let cardHeader = document.createElement("div");
+			cardHeader.className = "card-header";
+			// Set the background color and text color
+			cardHeader.style.backgroundColor = battery.color;
+			cardHeader.style.color = calculateBrightness(cardHeader.style.backgroundColor) > 128 ? "black" : "white";
+			cardHeader.style.minHeight = "110px";
+
+			cardHeader.innerHTML += `<h4>${battery.nickname}</h4>`;
+
+			// Invert delete button contrast
+			if (calculateBrightness(cardHeader.style.backgroundColor) > 128) {
+				deleteButton.style.filter = "none";
+				deleteButton.style.color = "black";
+			}
+
+			// if (readings.length > 0) {}
 			// Add the most recent reading value and charge percentage if there are readings
-			if (readings) {
+			// Add the most recent reading value and charge percentage if there are readings
+			// if (readings.length > 0) {
+			// Add the most recent reading value and charge percentage if there are readings
+			if (readings.length > 0) {
 				readings.sort((a, b) => b.timestamp - a.timestamp);
 				const mostRecentReading = readings[0];
 
 				let span = document.createElement("span");
 				span.innerHTML = `
-				<div class="row"><small>(${mostRecentReading.voltage}v - ${getState(mostRecentReading.voltage).stateOfCharge}%)</small></div>`;
+				<div class="row"><small>(${mostRecentReading.voltage}v - ${
+					getState(mostRecentReading.voltage).stateOfCharge
+				}%)</small></div>`;
 				cardHeader.appendChild(span);
 
-				// Set the background color and text color
-				cardHeader.style.backgroundColor = battery.color;
-				cardHeader.style.color = calculateBrightness(cardHeader.style.backgroundColor) > 128 ? "black" : "white";
-
 				let batteryIcon = document.createElement("img");
-				batteryIcon.style.background = "white";
 				batteryIcon.style.borderRadius = "10px";
+				batteryIcon.style.backgroundColor = "#212529";
 				batteryIcon.src = getState(mostRecentReading.voltage).icon;
+				batteryIcon.title = getState(mostRecentReading.voltage).colorClass;
+				batteryIcon.style.cursor = "pointer";
 				batteryIcon.width = 44;
 				batteryIcon.height = 30;
 
@@ -458,7 +535,7 @@ request.onsuccess = function (event) {
 			// Define a 'more info' button
 			let moreInfoBtn = document.createElement("button");
 			moreInfoBtn.className = "btn btn-outline-primary";
-			moreInfoBtn.innerHTML = "Edit";
+			moreInfoBtn.innerHTML = "Edit / Add Reading";
 			moreInfoBtn.id = `btn-${battery.id}`;
 			moreInfoBtn.setAttribute("data-bs-toggle", "modal");
 			moreInfoBtn.setAttribute("data-bs-target", "#edit-battery-modal");
@@ -469,11 +546,12 @@ request.onsuccess = function (event) {
 			// Add the card body
 			let cardBody = document.createElement("div");
 			cardBody.className = "card-body";
+			let cca = `CCA: ${battery.cca}`;
+			let ampHours = `Amp Hours: ${battery.ampHours}`;
 			cardBody.innerHTML = `
 				<h5 class="card-title">${battery.brand}</h5>
 				<p class="card-text">
-					CCA: ${battery.cca}<br>
-					Amp Hours: ${battery.ampHours}
+				${battery.deepCycle ? ampHours : cca} 
 				</p>`;
 			cardBody.appendChild(moreInfoBtn);
 
@@ -486,25 +564,113 @@ request.onsuccess = function (event) {
 		});
 	}
 
-	async function renderBatteryTable() {
+	/**
+	 * Constructs and renders a table of all the battery voltage readings to the page.
+	 * The table supports searching, sorting, column resizing, and pagination (currently capped at 10 readings per page)
+	 */
+	async function renderBatteryReadingsTable() {
+		const theme = document.documentElement.getAttribute("data-bs-theme");
+		//Info: https://gridjs.io/docs
+
 		let batteries = await getAllBatteries();
-		let tableBody = document.getElementById("battery-table");
-		let tableContents = "";
-		batteries.map((battery) => {
-			tableContents += `
-			<tr>
-				<td>${battery.id}</td>
-				<td>${battery.nickname}</td>
-				<td>${battery.brand}</td>
-				<td>${battery.deepCycle}</td>
-				<td>${battery.ampHours}</td>
-				<td>${battery.cca}</td>
-			</tr>`;
+		let allReadings = await getAllVoltageReadings();
+		let tableContainer = document.getElementById("voltage-reading-table-container");
+		tableContainer.innerHTML = "";
+
+		let data = [];
+		await batteries.map((battery) => {
+			let readings = allReadings.filter((r) => r.batteryId == battery.id);
+			readings.map((reading) => {
+				let readingDate = new Date(reading.timestamp);
+				let formattedDate = `${readingDate.toLocaleTimeString()}, ${readingDate.toDateString()}`;
+				data.push([
+					reading.id,
+					battery.nickname,
+					formattedDate,
+					parseFloat(reading.voltage).toFixed(2),
+					battery.deepCycle ? "true" : "false",
+				]);
+			});
 		});
 
-		tableBody.innerHTML = tableContents;
+		let readingGrid = new gridjs.Grid({
+			columns: [
+				{ name: "Id", hidden: true },
+				{ name: "Battery" },
+				{ name: "Time & Date" },
+				{ name: "Reading (Volts)" },
+				{ name: "Deep Cycle?" },
+				{
+					name: "Actions",
+					formatter: (_, row) => {
+						// Edit button click event
+						const editBtn = gridjs.h(
+							"button",
+							{
+								className: "btn action-btn btn-outline-info",
+								onClick: () => {
+									let readingToUpdate = allReadings.filter((reading) => reading.id === row.cells[0].data).pop();
+									const updatedVoltage = prompt(
+										`Enter a new voltage (this will replace ${readingToUpdate.voltage} volts)`
+									);
+									if (updatedVoltage) {
+										readingToUpdate.voltage = parseFloat(updatedVoltage).toFixed(2);
+										updateVoltageReading(readingToUpdate);
+									}
+								},
+							},
+							"Edit"
+						);
+						// Delete button click event
+						const deleteBtn = gridjs.h(
+							"button",
+							{
+								className: "btn action-btn btn-outline-danger",
+								onClick: () => {
+									const deleteConfirmed = confirm(
+										"Are you sure you wish to delete this voltage reading?\nThis action cannot be undone"
+									);
+									if (deleteConfirmed) {
+										deleteReadingById(row.cells[0].data);
+									}
+								},
+							},
+							"Delete"
+						);
+						return gridjs.h("div", { className: "button-container" }, editBtn, deleteBtn);
+					},
+				},
+			],
+			data: data,
+			className: {
+				table: `table table-hover`,
+				container: `background-${theme} font-${theme === "dark" ? "light" : "dark"}`,
+				th: `background-${theme === "dark" ? "mid" : "light"} font-${theme === "dark" ? "light" : "dark"}`,
+				td: `background-${theme === "dark" ? "mid" : "light"} font-${theme === "dark" ? "light" : "dark"}`,
+			},
+		}).render(tableContainer);
+
+		// Update table config and data
+		readingGrid
+			.updateConfig({
+				sort: true,
+				pagination: {
+					limit: 10,
+				},
+				resizable: true,
+				search: true,
+				data: data,
+			})
+			.forceRender();
 	}
+
+	// Ensure the table theme is updated
+	document.getElementById("theme-selection").addEventListener("click", () => {
+		updateUI();
+	});
 };
+
+//================ EVENT LISTENERS ================ //
 
 // Runs when the deepCycle checkbox is toggled, and displays the ampHour input if checked or the cca input if false
 document.getElementById("deepCycle").addEventListener("click", (event) => {
@@ -544,6 +710,8 @@ document.getElementById("edit-battery-modal").addEventListener("shown.bs.modal",
 	document.getElementById("edit-nickname").focus();
 });
 
+//================ UTILITY METHODS ================ //
+
 // Returns the battery state based on a given voltage reading
 function getState(voltage) {
 	return VOLTAGE_STATE.filter((state) => voltage <= state.range.high && voltage >= state.range.low)[0];
@@ -551,11 +719,81 @@ function getState(voltage) {
 
 // Function to calculate the brightness value
 function calculateBrightness(color) {
-  const rgb = color.match(/\d+/g);
-  const brightness = Math.sqrt(
-    rgb[0] * rgb[0] * 0.299 +
-    rgb[1] * rgb[1] * 0.587 +
-    rgb[2] * rgb[2] * 0.114
-  );
-  return brightness;
+	const rgb = color.match(/\d+/g);
+	const brightness = Math.sqrt(rgb[0] * rgb[0] * 0.299 + rgb[1] * rgb[1] * 0.587 + rgb[2] * rgb[2] * 0.114);
+	return brightness;
 }
+
+(() => {
+	"use strict";
+
+	const getStoredTheme = () => localStorage.getItem("theme");
+	const setStoredTheme = (theme) => localStorage.setItem("theme", theme);
+
+	const getPreferredTheme = () => {
+		const storedTheme = getStoredTheme();
+		if (storedTheme) {
+			return storedTheme;
+		}
+
+		return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+	};
+
+	const setTheme = (theme) => {
+		if (theme === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches) {
+			document.documentElement.setAttribute("data-bs-theme", "dark");
+		} else {
+			document.documentElement.setAttribute("data-bs-theme", theme);
+		}
+	};
+
+	setTheme(getPreferredTheme());
+
+	const showActiveTheme = (theme, focus = false) => {
+		const themeSwitcher = document.querySelector("#bd-theme");
+
+		if (!themeSwitcher) {
+			return;
+		}
+
+		const themeSwitcherText = document.querySelector("#bd-theme-text");
+		const activeThemeIcon = document.querySelector(".theme-icon-active use");
+		const btnToActive = document.querySelector(`[data-bs-theme-value="${theme}"]`);
+		const svgOfActiveBtn = btnToActive.querySelector("svg use").getAttribute("href");
+
+		document.querySelectorAll("[data-bs-theme-value]").forEach((element) => {
+			element.classList.remove("active");
+			element.setAttribute("aria-pressed", "false");
+		});
+
+		btnToActive.classList.add("active");
+		btnToActive.setAttribute("aria-pressed", "true");
+		activeThemeIcon.setAttribute("href", svgOfActiveBtn);
+		const themeSwitcherLabel = `${themeSwitcherText.textContent} (${btnToActive.dataset.bsThemeValue})`;
+		themeSwitcher.setAttribute("aria-label", themeSwitcherLabel);
+
+		if (focus) {
+			themeSwitcher.focus();
+		}
+	};
+
+	window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
+		const storedTheme = getStoredTheme();
+		if (storedTheme !== "light" && storedTheme !== "dark") {
+			setTheme(getPreferredTheme());
+		}
+	});
+
+	window.addEventListener("DOMContentLoaded", () => {
+		showActiveTheme(getPreferredTheme());
+
+		document.querySelectorAll("[data-bs-theme-value]").forEach((toggle) => {
+			toggle.addEventListener("click", () => {
+				const theme = toggle.getAttribute("data-bs-theme-value");
+				setStoredTheme(theme);
+				setTheme(theme);
+				showActiveTheme(theme, true);
+			});
+		});
+	});
+})();
