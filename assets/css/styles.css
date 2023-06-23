@@ -35,6 +35,9 @@ tr {
 footer {
     text-align: center;
     margin-block: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 hr {
@@ -164,3 +167,30 @@ td.background-mid {
     margin: auto;
 }
 
+@media screen and (max-width: 480px) {
+    #chartContainer {
+        height: 300px;
+        width: 100%;
+    }
+
+    #subtitle {
+        font-size: large;
+    }
+
+    footer {
+        flex-direction: column;
+    }
+
+    .separator {
+        display: none;
+    }
+
+    canvas.canvasjs-chart-canvas {
+        width: 100% !important;
+        height: auto !important;
+    }
+
+    body {
+        font-size: small !important;
+    }
+}
