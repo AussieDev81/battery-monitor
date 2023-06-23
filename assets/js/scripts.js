@@ -349,6 +349,7 @@ request.onsuccess = function (event) {
 		if (!isNaN(voltage)) {
 			addVoltageReading({ batteryId: batteryId, timestamp: new Date(), voltage: voltage });
 		}
+		e.target.reset();
 	});
 
 	//================ UI RENDERING ================ //
