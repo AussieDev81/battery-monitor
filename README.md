@@ -10,11 +10,7 @@ This initial version makes use of an indexed browser database to allow data pers
 <a href="https://www.buymeacoffee.com/aussiedev81" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" style="height: 40px;width: auto;" ></a>
 
 ## Chart
-The chart shows all battery voltage readings by timestamp (X axis) and voltage (Y axis) which are colour coded according to the battery colour for easy identification.   
-
-Readings are joined by colour-coded trend lines to help visualize battery state, and clicking on the battery name (at the bottom of the chart) will also toggle the visibility of readings for that battery to further make the chart easier to read.
-
-This chart is currently a [CanvasJS](https://canvasjs.com) trial
+The chart shows all battery voltage readings by timestamp (X axis) and voltage (Y axis) which are colour coded according to the battery colour for easy identification.
 
 ## Batteries
 The **Batteries** section displays each battery represented by its own card, which displays the following: 
