@@ -8,8 +8,8 @@ const CHART_Y_AXIS_VALUE_FORMAT = `#.## ${SUFFIX_SHORT}`;
 const CHART_X_AXIS_TITLE = "Timestamp";
 const CHART_Y_AXIS_TITLE = "Voltage";
 const CHART_CROSSHAIR_COLOR = "#ff00d4";
-const CHART_POINT_SIZE = 10;
-const CHART_POINT_SHAPE = "star";
+const CHART_POINT_SIZE = 7;
+const CHART_POINT_SHAPE = "circle";
 const VOLTAGE_STATE = [
 	{
 		stateOfCharge: 100,
