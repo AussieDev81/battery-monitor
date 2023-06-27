@@ -1,14 +1,15 @@
 const DB_NAME = "BatteryDB";
 const DB_VERSION = 1;
 const CHART_TITLE = "Battery Voltage Readings";
-const CHART_X_AXIS_VALUE_FORMAT = "DD MMM, YY";
+const CHART_X_AXIS_VALUE_FORMAT = "dd MMM, YY";
+const SUFFIX_SHORT = " V";
+const SUFFIX_LONG = " Volts";
+const CHART_Y_AXIS_VALUE_FORMAT = `#.## ${SUFFIX_SHORT}`;
+const CHART_X_AXIS_TITLE = "Timestamp";
 const CHART_Y_AXIS_TITLE = "Voltage";
-const CHART_Y_AXIS_SUFFIX = " V";
-const CHART_LEGEND_CURSOR = "pointer";
-const CHART_LEGEND_FONT_SIZE = 16;
-const DATA_POINT_X_VALUE_FORMAT = "DDD MMM YYYY h:mm:ss tt";
-const DATA_POINT_Y_VALUE_FORMAT = "#0.#0 Volts";
-const DATA_POINT_TYPE = "spline";
+const CHART_CROSSHAIR_COLOR = "#ff00d4";
+const CHART_POINT_SIZE = 10;
+const CHART_POINT_SHAPE = "star";
 const VOLTAGE_STATE = [
 	{
 		stateOfCharge: 100,
@@ -390,65 +391,94 @@ request.onsuccess = function (event) {
 	 * Constructs and renders the battery voltage reading chart on the page
 	 */
 	async function renderVoltageReadingChart() {
-		const theme = document.documentElement.getAttribute("data-bs-theme");
-		// Info: https://canvasjs.com/docs/charts/basics-of-creating-html5-chart/
+		const themeToggle = document.documentElement.getAttribute("data-bs-theme") === "dark" ? "#FFFFFF" : "#212529";
 
 		// Get the batteries and readings from the database
 		let batteries = await getAllBatteries();
 		let voltageReadings = await getAllVoltageReadings();
 
-		// Define and create the chart
-		chart = new CanvasJS.Chart("chartContainer", {
-			animationEnabled: true,
-			theme: theme === "dark" ? "dark1" : "light1",
-			title: {
-				text: CHART_TITLE,
-			},
-			axisX: {
-				valueFormatString: CHART_X_AXIS_VALUE_FORMAT,
-			},
-			axisY: {
-				title: CHART_Y_AXIS_TITLE,
-				suffix: CHART_Y_AXIS_SUFFIX,
-			},
-			legend: {
-				cursor: CHART_LEGEND_CURSOR,
-				fontSize: CHART_LEGEND_FONT_SIZE,
-				itemclick: toggleDataSeries,
-			},
-			toolTip: {
-				shared: true,
-			},
-			data: batteries.map((battery) => {
-				return {
-					name: battery.nickname,
-					color: battery.color,
-					type: DATA_POINT_TYPE,
-					xValueFormatString: DATA_POINT_X_VALUE_FORMAT,
-					yValueFormatString: DATA_POINT_Y_VALUE_FORMAT,
-					showInLegend: true,
-					dataPoints: voltageReadings
-						.filter((reading) => reading.batteryId == battery.id)
-						.sort((a, b) => a.batteryId - b.batteryId)
-						.map((reading) => {
-							return {
-								x: reading.timestamp,
-								y: parseFloat(reading.voltage),
-							};
-						}),
-				};
-			}),
-		});
-		chart.render();
 
-		//Toggle battery visibility
-		function toggleDataSeries(e) {
-			if (typeof e.dataSeries.visible === "undefined" || e.dataSeries.visible) {
-				e.dataSeries.visible = false;
-			} else {
-				e.dataSeries.visible = true;
-			}
-			chart.render();
+		// Load the Google Charts library
+		google.charts.load("current", { packages: ["corechart"] });
+
+		// Set a callback function to execute when the library is loaded
+		google.charts.setOnLoadCallback(drawChart);
+
+		// Define the callback function to create and render the chart
+		function drawChart() {
+			// Create the data table
+			let data = new google.visualization.DataTable();
+			data.addColumn("datetime", "Time");
+			batteries.forEach((battery) => {
+				data.addColumn("number", battery.nickname);
+			});
+
+			// Populate the data table with voltage readings
+			let rows = [];
+			voltageReadings.sort((a, b) => a.timestamp - b.timestamp);
+			voltageReadings.forEach((reading) => {
+				let row = [new Date(reading.timestamp)];
+				batteries.forEach((battery) => {
+					if (reading.batteryId == battery.id) {
+						row.push(parseFloat(reading.voltage));
+					} else {
+						row.push(null);
+					}
+				});
+				rows.push(row);
+			});
+			data.addRows(rows);
+
+			// Set chart options
+			let options = {
+				crosshair: { trigger: "both", color: CHART_CROSSHAIR_COLOR },
+				theme: "material",
+				backgroundColor: { fill: "transparent" },
+				pointSize: CHART_POINT_SIZE,
+				pointShape: CHART_POINT_SHAPE,
+				legend: {
+					position: "bottom",
+					textStyle: {
+						color: themeToggle,
+					},
+				},
+				hAxis: {
+					title: CHART_X_AXIS_TITLE,
+					format: CHART_X_AXIS_VALUE_FORMAT,
+					titleTextStyle: {
+						color: themeToggle,
+					},
+					textStyle: {
+						color: themeToggle,
+					},
+				},
+				vAxis: {
+					title: CHART_Y_AXIS_TITLE,
+					format: CHART_Y_AXIS_VALUE_FORMAT,
+					titleTextStyle: {
+						color: themeToggle,
+					},
+					textStyle: {
+						color: themeToggle,
+					},
+				},
+				curveType: "function",
+				titleTextStyle: {
+					bold: true,
+					fontSize: 25,
+					italic: true,
+					color: themeToggle,
+				},
+				colors: batteries.map((battery) => battery.color),
+				lineWidth: 3,
+				explorer: { axis: "horizontal", keepInBounds: true },
+			};
+
+			// Create the chart
+			let chart = new google.visualization.LineChart(document.getElementById("chartContainer"));
+
+			// Render the chart
+			chart.draw(data, options);
 		}
 	}
 
