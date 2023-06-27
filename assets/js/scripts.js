@@ -8,8 +8,8 @@ const CHART_Y_AXIS_VALUE_FORMAT = `#.## ${SUFFIX_SHORT}`;
 const CHART_X_AXIS_TITLE = "Timestamp";
 const CHART_Y_AXIS_TITLE = "Voltage";
 const CHART_CROSSHAIR_COLOR = "#ff00d4";
-const CHART_POINT_SIZE = 7;
-const CHART_POINT_SHAPE = "circle";
+const CHART_POINT_SIZE = 10;
+const CHART_POINT_SHAPE = "star";
 const VOLTAGE_STATE = [
 	{
 		stateOfCharge: 100,
@@ -80,7 +80,6 @@ request.onsuccess = function (event) {
 	updateUI();
 
 	//================ BATTERIES ================ //
-
 	function addBattery(battery) {
 		let transaction = db.transaction(["batteries"], "readwrite");
 		let store = transaction.objectStore("batteries");
@@ -431,7 +430,6 @@ request.onsuccess = function (event) {
 
 			// Set chart options
 			let options = {
-				crosshair: { trigger: "both", color: CHART_CROSSHAIR_COLOR },
 				theme: "material",
 				backgroundColor: { fill: "transparent" },
 				pointSize: CHART_POINT_SIZE,
@@ -748,77 +746,3 @@ function calculateBrightness(color) {
 	const brightness = Math.sqrt(rgb[0] * rgb[0] * 0.299 + rgb[1] * rgb[1] * 0.587 + rgb[2] * rgb[2] * 0.114);
 	return brightness;
 }
-
-(() => {
-	"use strict";
-
-	const getStoredTheme = () => localStorage.getItem("theme");
-	const setStoredTheme = (theme) => localStorage.setItem("theme", theme);
-
-	const getPreferredTheme = () => {
-		const storedTheme = getStoredTheme();
-		if (storedTheme) {
-			return storedTheme;
-		}
-
-		return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-	};
-
-	const setTheme = (theme) => {
-		if (theme === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches) {
-			document.documentElement.setAttribute("data-bs-theme", "dark");
-		} else {
-			document.documentElement.setAttribute("data-bs-theme", theme);
-		}
-	};
-
-	setTheme(getPreferredTheme());
-
-	const showActiveTheme = (theme, focus = false) => {
-		const themeSwitcher = document.querySelector("#bd-theme");
-
-		if (!themeSwitcher) {
-			return;
-		}
-
-		const themeSwitcherText = document.querySelector("#bd-theme-text");
-		const activeThemeIcon = document.querySelector(".theme-icon-active use");
-		const btnToActive = document.querySelector(`[data-bs-theme-value="${theme}"]`);
-		const svgOfActiveBtn = btnToActive.querySelector("svg use").getAttribute("href");
-
-		document.querySelectorAll("[data-bs-theme-value]").forEach((element) => {
-			element.classList.remove("active");
-			element.setAttribute("aria-pressed", "false");
-		});
-
-		btnToActive.classList.add("active");
-		btnToActive.setAttribute("aria-pressed", "true");
-		activeThemeIcon.setAttribute("href", svgOfActiveBtn);
-		const themeSwitcherLabel = `${themeSwitcherText.textContent} (${btnToActive.dataset.bsThemeValue})`;
-		themeSwitcher.setAttribute("aria-label", themeSwitcherLabel);
-
-		if (focus) {
-			themeSwitcher.focus();
-		}
-	};
-
-	window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => {
-		const storedTheme = getStoredTheme();
-		if (storedTheme !== "light" && storedTheme !== "dark") {
-			setTheme(getPreferredTheme());
-		}
-	});
-
-	window.addEventListener("DOMContentLoaded", () => {
-		showActiveTheme(getPreferredTheme());
-
-		document.querySelectorAll("[data-bs-theme-value]").forEach((toggle) => {
-			toggle.addEventListener("click", () => {
-				const theme = toggle.getAttribute("data-bs-theme-value");
-				setStoredTheme(theme);
-				setTheme(theme);
-				showActiveTheme(theme, true);
-			});
-		});
-	});
-})();

@@ -143,12 +143,6 @@ hr {
     fill: currentcolor;
 }
 
-
-/* Readings Table */
-/* #voltage-reading-table-container {
-    padding-block-end: 3rem;
-} */
-
 td.background-dark {
     background-color: var(--dark-color);
 }
@@ -164,10 +158,26 @@ td.background-mid {
     color: var(--dark-color);
 }
 
+
 /* Instructions */
 .fit-center {
     max-width: max-content;
     margin: auto;
+}
+
+
+/* feedback */
+.icon-tabler-arrow-back-up {
+    position: absolute;
+    top: 0;
+    left: 1rem;
+    margin: 1rem;
+    cursor: pointer;
+    stroke: var(--bs-body-color);
+}
+
+.icon-tabler-arrow-back-up:hover {
+    content: "Back";
 }
 
 @media screen and (max-width: 480px) {
@@ -188,12 +198,13 @@ td.background-mid {
         display: none;
     }
 
-    canvas.canvasjs-chart-canvas {
-        width: 100% !important;
-        height: auto !important;
-    }
-
     body {
         font-size: small !important;
+    }
+
+    .icon-tabler-arrow-back-up {
+        margin: .5rem;
+        scale: .75;
+        left: 0;
     }
 }
