@@ -463,12 +463,6 @@ request.onsuccess = function (event) {
 						color: themeToggle,
 					},
 				},
-				titleTextStyle: {
-					bold: true,
-					fontSize: 25,
-					italic: true,
-					color: themeToggle,
-				},
 				colors: batteries.map((battery) => battery.color),
 				lineWidth: 3,
 				explorer: { axis: "horizontal", keepInBounds: true },
