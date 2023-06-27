@@ -415,7 +415,7 @@ request.onsuccess = function (event) {
 
 			// Populate the data table with voltage readings
 			let rows = [];
-			voltageReadings.sort((a, b) => a.timestamp - b.timestamp);
+			voltageReadings.sort((a, b) => a.batteryId - b.batteryId);
 			voltageReadings.forEach((reading) => {
 				let row = [new Date(reading.timestamp)];
 				batteries.forEach((battery) => {
