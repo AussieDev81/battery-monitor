@@ -8,8 +8,8 @@ const CHART_Y_AXIS_VALUE_FORMAT = `#.## ${SUFFIX_SHORT}`;
 const CHART_X_AXIS_TITLE = "Timestamp";
 const CHART_Y_AXIS_TITLE = "Voltage";
 const CHART_CROSSHAIR_COLOR = "#ff00d4";
-const CHART_POINT_SIZE = 8;
-const CHART_POINT_SHAPE = "circle";
+const CHART_POINT_SIZE = 10;
+const CHART_POINT_SHAPE = "star";
 const VOLTAGE_STATE = [
 	{
 		stateOfCharge: 100,
@@ -414,7 +414,7 @@ request.onsuccess = function (event) {
 
 			// Populate the data table with voltage readings
 			let rows = [];
-			voltageReadings.sort((a, b) => a.timestamp - b.timestamp);
+			voltageReadings.sort((a, b) => a.batteryId - b.batteryId);
 			voltageReadings.forEach((reading) => {
 				let row = [new Date(reading.timestamp)];
 				batteries.forEach((battery) => {
@@ -435,7 +435,8 @@ request.onsuccess = function (event) {
 				pointSize: CHART_POINT_SIZE,
 				pointShape: CHART_POINT_SHAPE,
 				curveType: "function",
-				crosshair: { trigger: "both", color: CHART_CROSSHAIR_COLOR },
+				colors: batteries.map((battery) => battery.color),
+				lineWidth: 3,
 				legend: {
 					position: "bottom",
 					textStyle: {
@@ -462,14 +463,6 @@ request.onsuccess = function (event) {
 						color: themeToggle,
 					},
 				},
-				titleTextStyle: {
-					bold: true,
-					fontSize: 25,
-					italic: true,
-					color: themeToggle,
-				},
-				colors: batteries.map((battery) => battery.color),
-				lineWidth: 3,
 				explorer: { axis: "horizontal", keepInBounds: true },
 			};
 
