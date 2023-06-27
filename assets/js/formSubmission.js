@@ -1,8 +1,13 @@
 
 const feedbackForm = document.getElementById("feedback-form");
 const SITE_EMAIL = "aussiedev81@gmail.com";
+const EMAILJS_PUBLIC_KEY = "oKjtk3d35PlskoYhd";
 const goHome = () => (window.location = "index.html");
 document.getElementById("hp-phone").style.display = "none";
+
+window.onload = () => {
+	emailjs.init(EMAILJS_PUBLIC_KEY);
+};
 
 const setSendButtonText = (text = "Submit") => {
 	const sendButton = document.getElementById("send-btn");
