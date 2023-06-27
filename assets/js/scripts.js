@@ -399,9 +399,11 @@ request.onsuccess = function (event) {
 		// Load the Google Charts library
 		google.charts.load("current", { packages: ["corechart"] });
 
-		// Set a callback function to execute when the library is loaded
-		google.charts.setOnLoadCallback(drawChart);
-
+		if(voltageReadings.length > 0){
+			// Set a callback function to execute when the library is loaded
+			google.charts.setOnLoadCallback(drawChart);
+		}
+		
 		// Define the callback function to create and render the chart
 		function drawChart() {
 			// Create the data table
