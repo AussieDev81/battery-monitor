@@ -396,7 +396,6 @@ request.onsuccess = function (event) {
 		let batteries = await getAllBatteries();
 		let voltageReadings = await getAllVoltageReadings();
 
-
 		// Load the Google Charts library
 		google.charts.load("current", { packages: ["corechart"] });
 
@@ -690,6 +689,35 @@ request.onsuccess = function (event) {
 	// Ensure the table theme is updated
 	document.getElementById("theme-selection").addEventListener("click", () => {
 		updateUI();
+	});
+
+	// Generate a sharable link that will enable database content to be shared to another device's indexed db
+	document.getElementById("export-button").addEventListener("click", async () => {
+		const batteries = await getAllBatteries();
+		const readings = await getAllVoltageReadings();
+
+		batteries.map((battery) => {
+			battery.readings = Array.from(readings.filter((reading) => reading.batteryId === battery.id));
+		});
+
+		const export_data = {
+			exported: new Date(),
+			data: batteries,
+		};
+
+		const jsonObject = JSON.stringify(export_data);
+		const encoded = btoa(jsonObject);
+		const link = new URL(window.location);
+		link.searchParams.append("data", encoded);
+
+		navigator.clipboard
+			.writeText(link)
+			.then(() => {
+				alert("Your sharable data link has been copied to your clipboard");
+			})
+			.catch((error) => {
+				console.error("Failed to copy sharable link: ", error);
+			});
 	});
 };
 

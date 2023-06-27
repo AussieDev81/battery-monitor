@@ -158,6 +158,15 @@ td.background-mid {
     color: var(--dark-color);
 }
 
+.icon-tabler-database-export {
+    position: absolute;
+    top: 0;
+    right: 1rem;
+    margin: 1rem;
+    cursor: pointer;
+    stroke: var(--bs-body-color);
+}
+
 
 /* Instructions */
 .fit-center {
@@ -176,9 +185,6 @@ td.background-mid {
     stroke: var(--bs-body-color);
 }
 
-.icon-tabler-arrow-back-up:hover {
-    content: "Back";
-}
 
 @media screen and (max-width: 480px) {
     #chartContainer {
@@ -207,4 +213,17 @@ td.background-mid {
         scale: .75;
         left: 0;
     }
+
+    .icon-tabler-arrow-back-up {
+        margin: .5rem;
+        scale: .75;
+        left: 0;
+    }
+
+    .icon-tabler-database-export {
+        margin: .5rem;
+        scale: .75;
+        right: 0;
+    }
+
 }
