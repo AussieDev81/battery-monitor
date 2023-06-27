@@ -436,6 +436,9 @@ request.onsuccess = function (event) {
 				backgroundColor: { fill: "transparent" },
 				pointSize: CHART_POINT_SIZE,
 				pointShape: CHART_POINT_SHAPE,
+				curveType: "function",
+				colors: batteries.map((battery) => battery.color),
+				lineWidth: 3,
 				legend: {
 					position: "bottom",
 					textStyle: {
@@ -462,15 +465,6 @@ request.onsuccess = function (event) {
 						color: themeToggle,
 					},
 				},
-				curveType: "function",
-				titleTextStyle: {
-					bold: true,
-					fontSize: 25,
-					italic: true,
-					color: themeToggle,
-				},
-				colors: batteries.map((battery) => battery.color),
-				lineWidth: 3,
 				explorer: { axis: "horizontal", keepInBounds: true },
 			};
 
