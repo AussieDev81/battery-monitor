@@ -396,6 +396,7 @@ request.onsuccess = function (event) {
 		let batteries = await getAllBatteries();
 		let voltageReadings = await getAllVoltageReadings();
 
+
 		// Load the Google Charts library
 		google.charts.load("current", { packages: ["corechart"] });
 
