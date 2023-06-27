@@ -429,7 +429,7 @@ request.onsuccess = function (event) {
 					showInLegend: true,
 					dataPoints: voltageReadings
 						.filter((reading) => reading.batteryId == battery.id)
-						.sort((a, b) => a.timestamp - b.timestamp)
+						.sort((a, b) => a.batteryId - b.batteryId)
 						.map((reading) => {
 							return {
 								x: reading.timestamp,
